@@ -6,25 +6,25 @@ import './App.css'
 
 const models: LLMModel[] = [
   {
-    id: 'senecoder',
-    name: 'SeneCoder',
-    description: 'Especializado en tareas de programación y desarrollo de código. Perfecto para resolver problemas técnicos, debug, y escribir código de calidad.',
-    color: '#3B82F6',
-    icon: '💻'
+    id: 'llama3.1:8b',
+    name: 'Seneca',
+    description: 'Modelo versátil para tareas variadas y conversaciones generales. Tu asistente para todo tipo de consultas y proyectos diversos.',
+    color: '#8B5CF6',
+    icon: '🧠'
   },
   {
-    id: 'seneacademico',
+    id: 'qwen2.5:7b',
     name: 'SeneAcademico',
     description: 'Diseñado para trabajos investigativos y análisis profundos. Ideal para investigación académica, análisis de documentos y escritura científica.',
     color: '#10B981',
     icon: '📚'
   },
   {
-    id: 'seneca',
-    name: 'Seneca',
-    description: 'Modelo versátil para tareas variadas y conversaciones generales. Tu asistente para todo tipo de consultas y proyectos diversos.',
-    color: '#8B5CF6',
-    icon: '🧠'
+    id: 'dagbs/deepseek-coder-v2-lite-instruct:latest',
+    name: 'SeneCoder',
+    description: 'Especializado en tareas de programación y desarrollo de código. Perfecto para resolver problemas técnicos, debug, y escribir código de calidad.',
+    color: '#3B82F6',
+    icon: '💻'
   }
 ]
 

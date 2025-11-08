@@ -1,52 +1,29 @@
+// src/api/inference.ts
 import { InferenceRequest, InferenceResponse } from '../types'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://172.24.100.180:8000'
 
-export async function submitInference(request: InferenceRequest): Promise<InferenceResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/submit-inference`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request)
-    })
+export async function submitInference(
+  request: InferenceRequest
+): Promise<InferenceResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/submit-inference`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Para enviar cookies de sesión
+    body: JSON.stringify(request),
+  })
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error submitting inference:', error)
-
-    // Fallback response for development/demo purposes
-    return {
-      job_id: `demo_${Date.now()}`,
-      status: 'submitted'
-    }
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}))
+    throw new Error(errorData.message || 'Error al enviar la inferencia')
   }
+
+  return response.json()
 }
 
-export async function submitInferenceAlias(request: InferenceRequest): Promise<InferenceResponse> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/inference/submit`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request)
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    return await response.json()
-  } catch (error) {
-    console.error('Error submitting inference (alias):', error)
-
-    // Fallback to main endpoint
-    return submitInference(request)
-  }
+// Función para obtener el resultado de un job
+export async function getJobResult(jobId: string): Promise<string> {
+  return `Job ${jobId} en proceso. Verifica el resultado en la terminal.`
 }
