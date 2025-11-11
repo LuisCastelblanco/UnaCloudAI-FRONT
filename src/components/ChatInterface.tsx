@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { LLMModel, ChatMessage } from '../types'
-import { submitInference } from '../api/inference'
+import { submitInference, pollJobResult } from '../api/inference'
 import './ChatInterface.css'
 
 interface ChatInterfaceProps {
@@ -44,29 +44,65 @@ function ChatInterface({ model, onBack }: ChatInterfaceProps) {
     setInputMessage('')
     setIsLoading(true)
 
+    // Mensaje temporal mientras procesa
+    const loadingMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: '🔄 Procesando tu solicitud en el cluster GPU...',
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, loadingMessage])
+
     try {
+      // Enviar el job
       const response = await submitInference({
         prompt: inputMessage,
         model: model.id,
-        max_tokens: 500
+        max_tokens: 1000
       })
 
+      const jobId = response.job_id
+
+      // Actualizar mensaje de loading con Job ID
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === loadingMessage.id 
+            ? { ...msg, content: `⏳ Job enviado (ID: ${jobId}). Esperando respuesta del modelo ${model.name}...` }
+            : msg
+        )
+      )
+
+      // Consultar el resultado cada 3 segundos
+      const result = await pollJobResult(jobId, 60000) // timeout 60 segundos
+
+      // Reemplazar mensaje de loading con la respuesta real
       const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: loadingMessage.id,
         role: 'assistant',
-        content: `Procesando tu solicitud... (Job ID: ${response.job_id}, Estado: ${response.status})`,
+        content: result,
         timestamp: new Date()
       }
 
-      setMessages(prev => [...prev, assistantMessage])
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === loadingMessage.id ? assistantMessage : msg
+        )
+      )
+
     } catch (error) {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Lo siento, hubo un error al procesar tu solicitud. Por favor intenta de nuevo.',
+        content: `❌ Error: ${error instanceof Error ? error.message : 'No se pudo procesar tu solicitud'}`,
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, errorMessage])
+      
+      // Reemplazar mensaje de loading con error
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === loadingMessage.id ? errorMessage : msg
+        )
+      )
     } finally {
       setIsLoading(false)
     }
