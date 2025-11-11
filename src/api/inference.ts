@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://172.24.100.180:8000
 export async function submitInference(
   request: InferenceRequest
 ): Promise<InferenceResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/submit-inference`, {
+   const response = await fetch(`${API_BASE_URL}/api/submit-inference`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
